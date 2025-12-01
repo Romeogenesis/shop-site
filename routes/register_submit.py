@@ -1,0 +1,32 @@
+from flask import request, Blueprint
+
+from database.add_users import add_user
+
+register_bp = Blueprint('register', __name__)
+
+
+@register_bp.route('/register/submit', methods=['POST'])
+def register_submit():
+    role = request.form.get('role')
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    valid_roles = {'user', 'warehouse', 'admin'}
+    if role not in valid_roles or not username or not password:
+        return "⚠️ Некорректные данные. <a href='/'>Назад</a>", 400
+
+    role_names = {
+        'user': 'Пользователь',
+        'warehouse': 'Кладовщик',
+        'admin': 'Администратор'
+    }
+
+    add_user(username, password, role)
+
+    return f'''
+    <h2>Успешная регистрация!</h2>
+    <p><strong>Логин:</strong> {username}</p>
+    <p><strong>Роль:</strong> {role_names[role]}</p>
+    <p>Теперь вы можете <a href="/main_menu">войти</a>.</p>
+    '''
+
