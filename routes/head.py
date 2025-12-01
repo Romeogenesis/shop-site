@@ -27,9 +27,19 @@ def registration():
 
         if has_account == 'yes':
             return '''
-            <h2>Вы уже зарегистрированы?</h2>
-            <p>Отлично! Перейдите на <a href="/main_menu">страницу входа</a>.</p>
-            <a href="/">← Назад</a>
+            <!DOCTYPE html>
+            <html>
+            <body>
+              <h2>Вход</h2>
+              <form method="POST" action="/auth/submit">
+                <label>Логин: <input type="text" name="username" required minlength="3"></label><br><br>
+                <label>Пароль: <input type="password" name="password" required minlength="6"></label><br><br>
+
+                <button type="submit">Войти</button>
+              </form>
+              <a href="/">← Назад</a>
+            </body>
+            </html>
             '''
 
         elif has_account == 'no':

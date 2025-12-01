@@ -21,7 +21,8 @@ def register_submit():
         'admin': 'Администратор'
     }
 
-    add_user(username, password, role)
+    if not add_user(username, password, role):
+        return f"Пользователь с логином <strong>{username}</strong> уже существует. <a href='/'>Назад</a>", 409
 
     return f'''
     <h2>Успешная регистрация!</h2>
