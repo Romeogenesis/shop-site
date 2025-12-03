@@ -1,4 +1,4 @@
-from database.database import get_db_connection
+from database.database_users import get_db_connection
 
 def check_user(name: str, password: str):
     conn = get_db_connection()

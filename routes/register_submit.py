@@ -1,4 +1,4 @@
-from flask import request, Blueprint
+from flask import request, Blueprint, redirect
 
 from database.add_users import add_user
 
@@ -24,10 +24,5 @@ def register_submit():
     if not add_user(username, password, role):
         return f"Пользователь с логином <strong>{username}</strong> уже существует. <a href='/'>Назад</a>", 409
 
-    return f'''
-    <h2>Успешная регистрация!</h2>
-    <p><strong>Логин:</strong> {username}</p>
-    <p><strong>Роль:</strong> {role_names[role]}</p>
-    <p>Теперь вы можете <a href="/main_menu">войти</a>.</p>
-    '''
+    return redirect(f'/{role}')
 
