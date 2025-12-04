@@ -1,6 +1,6 @@
 from flask import request, Blueprint, redirect
 
-from database.add_users import add_user
+from database.add_user import add_user
 
 register_bp = Blueprint('register', __name__)
 

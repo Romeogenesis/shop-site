@@ -9,9 +9,8 @@ def init_products_db():
     cursor = conn.cursor()
 
     cursor.execute('''
-            CREATE TABLE IF NOT EXISTS products (
+            CREATE TABLE IF NOT EXISTS orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                product_name TEXT NOT NULL UNIQUE,
                 price INTEGER NOT NULL
             )
     ''')
@@ -23,4 +22,3 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
-
