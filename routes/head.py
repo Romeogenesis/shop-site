@@ -51,7 +51,7 @@ def registration():
               <h2>Создание нового аккаунта</h2>
               <form method="POST" action="/register/submit">
                 <label><input type="radio" name="role" value="user" required> Пользователь</label><br>
-                <label><input type="radio" name="role" value="warehouse"> Кладовщик</label><br>
+                <label><input type="radio" name="role" value="keeper"> Кладовщик</label><br>
                 <label><input type="radio" name="role" value="admin"> Администратор</label><br><br>
 
                 <label>Логин: <input type="text" name="username" required minlength="3"></label><br><br>

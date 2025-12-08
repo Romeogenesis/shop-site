@@ -13,7 +13,7 @@ def init_users_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE,
                 password TEXT NOT NULL,
-                role TEXT NOT NULL CHECK(role IN ('user', 'warehouse', 'admin'))
+                role TEXT NOT NULL CHECK(role IN ('user', 'keeper', 'admin'))
             )
     ''')
 

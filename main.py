@@ -1,4 +1,5 @@
 from flask import Flask
+import secrets
 
 from database.database_users import init_users_db
 from database.database_products import init_products_db
@@ -8,16 +9,19 @@ from routes.register_submit import register_bp
 from routes.auth_submit import auth_bp
 from menu.admin_menu import admin_bp
 from menu.user_menu import user_bp
+from menu.keeper_menu import keeper_bp
 
 
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
     
 app.register_blueprint(head_bp)
 app.register_blueprint(register_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(user_bp)
+app.register_blueprint(keeper_bp)
 
 if __name__ == '__main__':
     init_users_db()

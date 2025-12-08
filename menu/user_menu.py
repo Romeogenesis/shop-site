@@ -1,16 +1,19 @@
-# user_menu.py
-from flask import Blueprint, request, render_template_string
+from flask import Blueprint, request, render_template_string, session, redirect, url_for
 from models.user import User
 
 user_bp = Blueprint('user', __name__)
 
+
 @user_bp.route('/user', methods=['GET', 'POST'])
 def user_dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('head.registration'))
+
+    user_id = session['user_id']
     user = User()
     message = ""
     current_order = None
 
-    # Получаем список товаров для выпадающего списка
     all_products = user.get_all_products()
 
     if request.method == 'POST':
@@ -28,11 +31,12 @@ def user_dashboard():
                             message = "❌ Товар не найден"
                         else:
                             order_id = user.create_order(
+                                user_id=user_id,
                                 total_price=product["price"],
                                 product_names=[product["name"]]
                             )
                             message = f"✅ Заказ №{order_id} создан"
-                            current_order = user.get_order(order_id)
+                            current_order = user.get_order(user_id, order_id)
                     except ValueError:
                         message = "⚠️ Некорректный ID товара"
 
@@ -43,11 +47,11 @@ def user_dashboard():
                 else:
                     try:
                         order_id = int(order_id_str)
-                        current_order = user.get_order(order_id)
+                        current_order = user.get_order(user_id, order_id)
                         if current_order:
                             message = f"✅ Заказ №{order_id} загружен"
                         else:
-                            message = f"❌ Заказ №{order_id} не найден"
+                            message = f"❌ Заказ не найден или не принадлежит вам"
                     except ValueError:
                         message = "⚠️ Номер заказа должен быть числом"
 
@@ -63,30 +67,27 @@ def user_dashboard():
                         product = next((p for p in all_products if p["id"] == product_id), None)
                         if not product:
                             message = "❌ Товар не найден"
-                        elif user.add_product_to_order(order_id, product["name"]):
-                            # Пересчитываем итоговую цену
-                            order = user.get_order(order_id)
+                        elif user.add_product_to_order(user_id, order_id, product["name"]):
+                            order = user.get_order(user_id, order_id)
                             if order:
-                                # Простой пересчёт: сумма цен всех товаров
                                 total = sum(
                                     next((p["price"] for p in all_products if p["name"] == name), 0)
                                     for name in order["products"]
                                 )
-                                # Обновляем total_price
                                 conn = user._get_connection()
                                 try:
                                     cursor = conn.cursor()
                                     cursor.execute(
-                                        "UPDATE orders SET total_price = ? WHERE id = ?",
-                                        (total, order_id)
+                                        "UPDATE orders SET total_price = ? WHERE id = ? AND user_id = ?",
+                                        (total, order_id, user_id)
                                     )
                                     conn.commit()
                                 finally:
                                     conn.close()
                             message = f"✅ Товар '{product['name']}' добавлен"
-                            current_order = user.get_order(order_id)
+                            current_order = user.get_order(user_id, order_id)
                         else:
-                            message = f"❌ Не удалось добавить товар"
+                            message = f"❌ Не удалось добавить товар (возможно, заказ не ваш)"
                     except ValueError:
                         message = "⚠️ Некорректные данные"
 
@@ -98,9 +99,8 @@ def user_dashboard():
                 else:
                     try:
                         order_id = int(order_id_str)
-                        if user.remove_product_from_order(order_id, product_name):
-                            # Пересчитываем итог
-                            order = user.get_order(order_id)
+                        if user.remove_product_from_order(user_id, order_id, product_name):
+                            order = user.get_order(user_id, order_id)
                             if order:
                                 total = sum(
                                     next((p["price"] for p in all_products if p["name"] == name), 0)
@@ -110,16 +110,16 @@ def user_dashboard():
                                 try:
                                     cursor = conn.cursor()
                                     cursor.execute(
-                                        "UPDATE orders SET total_price = ? WHERE id = ?",
-                                        (total, order_id)
+                                        "UPDATE orders SET total_price = ? WHERE id = ? AND user_id = ?",
+                                        (total, order_id, user_id)
                                     )
                                     conn.commit()
                                 finally:
                                     conn.close()
                             message = f"✅ Товар '{product_name}' удалён"
-                            current_order = user.get_order(order_id)
+                            current_order = user.get_order(user_id, order_id)
                         else:
-                            message = f"❌ Товар не найден в заказе"
+                            message = f"❌ Товар не найден в заказе или заказ не ваш"
                     except ValueError:
                         message = "⚠️ Ошибка данных"
 
@@ -133,11 +133,11 @@ def user_dashboard():
                 else:
                     try:
                         order_id = int(order_id_str)
-                        if user.set_payment_method(order_id, method):
+                        if user.set_payment_method(user_id, order_id, method):
                             message = f"✅ Оплата '{method}' установлена"
-                            current_order = user.get_order(order_id)
+                            current_order = user.get_order(user_id, order_id)
                         else:
-                            message = f"❌ Не удалось установить оплату"
+                            message = f"❌ Не удалось установить оплату (заказ не найден или не ваш)"
                     except ValueError:
                         message = "⚠️ Некорректный номер заказа"
 
@@ -205,8 +205,6 @@ input,select{padding:6px 10px;border:1px solid #ccc;border-radius:4px}
   {% endif %}
 </p>
 <p><strong>Итого:</strong> {{ current_order.total_price }} ₽</p>
-
-<!-- остальное без изменений -->
 
 <h4>Товары:</h4>
 <ul style="list-style:none;padding-left:0">
