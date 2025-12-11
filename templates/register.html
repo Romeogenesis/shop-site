@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создание аккаунта</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Создание нового аккаунта</h2>
+        <form method="POST" action="/register/submit">
+            <p>Выберите роль:</p>
+            <label>
+                <input type="radio" name="role" value="user" required>
+                Пользователь
+            </label>
+            <label>
+                <input type="radio" name="role" value="keeper">
+                Кладовщик
+            </label>
+            <label>
+                <input type="radio" name="role" value="admin">
+                Администратор
+            </label>
+
+            <label>
+                Логин:
+                <input type="text" name="username" required minlength="3">
+            </label>
+            <label>
+                Пароль:
+                <input type="password" name="password" required minlength="6">
+            </label>
+
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <a href="/">← Назад</a>
+    </div>
+</body>
+</html>
